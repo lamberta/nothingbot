@@ -54,6 +54,8 @@ def print_output (responses):
     else:
         for res in responses:
             print(res, file=sys.stdout)
+    if len(responses) < RETURN_COUNT:
+        print("Warning: Only generated %d of %d responses" % (len(responses), RETURN_COUNT), file=sys.stderr)
 
 
 if __name__ == '__main__':

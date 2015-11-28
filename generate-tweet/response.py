@@ -4,6 +4,7 @@ from collections import OrderedDict
 from nltk.tokenize import sent_tokenize
 import sys
 import re
+import random
 import markov
 
 TWITTER_LEN = 140
@@ -76,6 +77,7 @@ SHORTEN_1_SUBS = OrderedDict([
 
 SHORTEN_2_SUBS = OrderedDict([
     (r'[Aa]bout', r'abt'),
+    (r' [Oo]ne ', r' 1 '),
     (r' [Yy]ou ', r' U '),
     (r'\!\!\!', r'!'),
     (r'\?\?\?', r'?'),
@@ -88,13 +90,14 @@ SHORTEN_2_SUBS = OrderedDict([
     (r'[Tt]onite', r'2nite')
 ])
 
-#rules to join tokens into a single response string
+
 def format_tweet (tokens):
+    """Rules to join tokens into a single response string"""
     if len(tokens) == 0:
         print("Warning: empty token list, skipping", file=sys.stderr)
         return None
     ## LOG
-    print("\033[90m==>" + str(tokens) + '\033[0m')
+    #print("\033[90m==>" + str(tokens) + '\033[0m', file=sys.stderr)
     res = ''
     for i, token in enumerate(tokens):
         if token in TOKEN_SUBS: token = TOKEN_SUBS.get(token)
@@ -104,7 +107,7 @@ def format_tweet (tokens):
         else:
             res += (' ' + token)
     ## LOG
-    print("\033[90m==>" + res + '\033[0m')
+    #print("\033[90m==>" + res + '\033[0m', file=sys.stderr)
     for pattern, replace in STRING_SUBS.iteritems():
         res = re.sub(pattern, replace, res)
     res = res.strip() #surrounding whitespace
@@ -135,34 +138,41 @@ def shorten_tweet (string):
     string2 = string2.strip()
     if len(string2) <= TWITTER_LEN:
         return string2
-    # #phase 3: break sentences
-    # sentences = sent_tokenize(string)
-    # sentences.sort(key=len)
-    # sentences.reverse() #want longest first
-    # string3 = ''
-    # for i, sentence in enumerate(sentences):
-    #     print("log 3-----------------: ", sentence)
-    #     if len(sentence) <= TWITTER_LEN:
-    #         string3 += sentence
-    #     #let's see if we can add another?
-    #     if i < len(sentences) - 1:
-    #         if len(string3) + len(sentence[i + 1]) < TWITTER_LEN:
-    #             string3 += (' ' + sentence[i + 1]) #need xtra space
-    #     if len(string3) > 0:
-    #         print("log 3-----------------: ", string3)
-    #         return string3
-    # #phase 4: worst case, chop it off
-    # string4 = string2[:TWITTER_LEN]
-    # string4 = re.sub(r'[^\s]+$', r'', string4).strip() #remove any cutoff word
-    # print("log 4-----------------", string4)
-    # return string4
+    #phase 3: break sentences
+    sentences = sent_tokenize(string)
+    if len(sentences) > 1:
+        sentences.sort(key=len) #short to long
+        return shorten_tweet(sentences[-1]) #take longest, try again
+    else:
+        #must be one really long run-on sentence
+        return None
+
+
+def list_middle (lst, count=1, offset=0):
+    l = len(lst)
+    if count > l:
+        raise IndexError("Count too high")
+    start = int((l - count) / 2)
+    start += offset
+    if start < 0 or start + count > l:
+        raise IndexError("Offset out of bounds")
+    return lst[start : start+count]
 
 
 def build_tweets (token_lists, count=1, ngram=3):
-    responses = []
-    markov_tokens = markov.generate_from_token_lists(token_lists, ngram, count)
+    all_responses = []
+    #generate twice as many as we need, min 10, take the longest of the bunch
+    gen_count = count*2
+    if gen_count < 10: gen_count = 10
+    markov_tokens = markov.generate_from_token_lists(token_lists, ngram, gen_count)
     for tokens in markov_tokens:
         res = format_tweet(tokens)
         res = shorten_tweet(res)
-        responses.append(res)
+        if res is not None:
+            all_responses.append(res)
+    all_responses.sort(key=len) #short to long
+    all_responses.reverse()     #long to short
+    #select middle section of list and randomize
+    responses = list_middle(all_responses, count)
+    random.shuffle(responses)
     return responses
