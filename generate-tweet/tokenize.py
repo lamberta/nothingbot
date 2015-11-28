@@ -2,6 +2,7 @@
 
 import os
 import re
+import codecs
 from nltk.tokenize import sent_tokenize
 from nltk.tokenize import TreebankWordTokenizer
 from nltk.tokenize import TweetTokenizer
@@ -22,7 +23,7 @@ def tokenize_text (text):
 def tokenize_file (filename):
     if not os.path.isfile(filename):
         raise IOError("File doesn't exist: %s" % filename)
-    with open(filename) as f:
+    with codecs.open(filename,'r',encoding='utf8') as f:
         contents = f.read()
     return tokenize_text(contents)
     

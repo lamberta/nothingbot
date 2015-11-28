@@ -24,24 +24,24 @@
 #remove opening self mentions to @realDonaldTrump
 #chomp whitespace
 cat "${1:-/dev/stdin}" | \
-	sed -E 's/https?:\/\/[^[:space:]]+//g' | \
-	sed -E 's/pic\.twitter\.com[^[:space:]]+//g' | \
+  sed -E 's/https?:\/\/[^[:space:]]+//g' | \
+  sed -E 's/pic\.twitter\.com[^[:space:]]+//g' | \
   sed -e 's/^"//g' -e 's/"$//g' -e 's/\\"/"/g' \
       -e 's/\\n/ /g' -e "s/[‘’]/'/g" -e 's/[“”]/-/g' \
       -e 's/[–—~]/-/g' | tr -s '-' | \
   sed -E 's/\.{2,}/…/g' | \
-	sed -E 's/\([:space:]?cont[:space:]?\)//g' | \
-	sed -e 's/"//g' \
-			-e 's/^[[:space:]]*\.//g' \
-			-e 's/[Aa]\.[Mm]\./am/g' \
-			-e 's/[Pp]\.[Mm]\./pm/g' \
-			-e 's/[[:space:]]\(\&\)\([^\s]\)/ \1 \2/g' \
-			-e 's/[\.,;!?]\(\&\)\([^\s]\)/ \1 \2/g' \
-			-e 's/\([^\s]*\)\(&\)[[:space:]]/\1 \2 /g' \
-			-e 's/[[:space:]]&[[:space:]]/ and /g' | \
+  sed -E 's/\([:space:]?cont[:space:]?\)//g' | \
+  sed -e 's/"//g' \
+      -e 's/^[[:space:]]*\.//g' \
+      -e 's/[Aa]\.[Mm]\./am/g' \
+      -e 's/[Pp]\.[Mm]\./pm/g' \
+      -e 's/[[:space:]]\(\&\)\([^\s]\)/ \1 \2/g' \
+      -e 's/[\.,;!?]\(\&\)\([^\s]\)/ \1 \2/g' \
+      -e 's/\([^\s]*\)\(&\)[[:space:]]/\1 \2 /g' \
+      -e 's/[[:space:]]&[[:space:]]/ and /g' | \
   tr -s [:space:] | \
-	sed -E 's/([^\s\.]{2,})\.([^\s\.]{2,})/\1 . \2/g' | \
+  sed -E 's/([^\s\.]{2,})\.([^\s\.]{2,})/\1 . \2/g' | \
   sed -e 's/^-//g' -e 's/- -/-/g'| \
-	sed -E 's/^["\.]?\.?@.*: +//g' | \
-	sed	-E 's/\.?@realDonaldTrump +//g' | \
-	sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+  sed -E 's/^["\.]?\.?@.*: +//g' | \
+  sed -E 's/\.?@realDonaldTrump +//g' | \
+  sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'

@@ -16,22 +16,22 @@ STRING_SUBS = OrderedDict([
     (r' is is ', r' is '),
     (r' to to ', r' to '),
     (r' the the ', r' the '),
-    (r" ' [Ss]( ?|\.|\.!\?|$)", r"'s "),  #'s
-    (r"^' [Ss] ", r''),                 #opening 's
-    (r"s ' ","[Ss]' "),                   #s'
-    (r" ' (.*) '( ?|$)", r" '\1' "),   #shrink single-quotes around phrase
-    (r" - (.*) -( ?|$)", r" -\1- "),   #shrink single-dash around phrase
-    (r' \( (.*) \)', r' (\1)'),        #shrink parens around phrase
-    (r"(^[^']*) ' ([^']*$)", r'\1 \2'),#remove a single errant ' in middle
-    (r'\s+-\s*$', r''),                #don't end with a space-dash
-    (r" w / ", r" w/ "),               #squeeze 'w/'
-    (r'\,{2,}', r','),                 #squeeze ,
-    (r'( \$) (\d)', r'\1\2'),          #move $ right
-    (r'(\d{1,},) (\d{2,})', r'\1\2'),  #squeeze large number with comma
-    (r'(\d) % ', r'\1% '),             #squeeze percent 'n % ' to 'n% '
-    (r' :{2,}', r':'),                 #squeeze space-colons
-    (r'\$ \$ \$', r'$$$'),             #speeze 3 $'s together
-    (r' ([\.?!,;:])$', r'\1')          #squeeze space and final punct
+    (r" ' [Ss]( ?|\.|\.!\?|$)", r"'s "), #'s
+    (r"^' [Ss] ", r''),                  #opening 's
+    (r"s ' ","[Ss]' "),                  #s'
+    (r" ' (.*) '( ?|$)", r" '\1' "),     #shrink single-quotes around phrase
+    (r" - (.*) -( ?|$)", r" -\1- "),     #shrink single-dash around phrase
+    (r' \( (.*) \)', r' (\1)'),          #shrink parens around phrase
+    (r"(^[^']*) ' ([^']*$)", r'\1 \2'),  #remove a single errant ' in middle
+    (r'\s+-\s*$', r''),                  #don't end with a space-dash
+    (r" w / ", r" w/ "),                 #squeeze 'w/'
+    (r'\,{2,}', r','),                   #squeeze ,
+    (r'( \$) (\d)', r'\1\2'),            #move $ right
+    (r'(\d{1,},) (\d{2,})', r'\1\2'),    #squeeze large number with comma
+    (r'(\d) % ', r'\1% '),               #squeeze percent 'n % ' to 'n% '
+    (r' :{2,}', r':'),                   #squeeze space-colons
+    (r'\$ \$ \$', r'$$$'),               #speeze 3 $'s together
+    (r' ([\.?!,;:])$', r'\1')            #squeeze space and final punct
 ])
 
 SHORTEN_1_SUBS = OrderedDict([
