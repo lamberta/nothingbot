@@ -1,2 +1,3 @@
+settings.json
 corpus/tweets/*.txt
 corpus/tweets/*-html.tar.gz
