@@ -1,3 +1,18 @@
+# Post Tweet
+
+This generates a single response and posts it to the timeline:
+
+~~~
+~$ node actions/post-tweet.js
+~~~
+
+The default n-gram factor is 3, see the `-h` flag for options. You can
+also post an arbitrary status update from the command-line:
+
+~~~
+~$ node actions/post-tweet.js -s 'post this tweet to status timeline'
+~~~
+
 # Generate Tweet
 
 Train on tweet corpus and generate a response:
@@ -6,8 +21,9 @@ Train on tweet corpus and generate a response:
 ~$ python ./generate-tweet/main.py -t tweets.txt
 ~~~
 
-Train with text corpus, use n-gram factor of 2, generate 20 responses
-and return in a JSON array:
+See the `-h` flag for options. The following trains with text corpus,
+uses an n-gram factor of 2, and generates 20 responses returned in a
+JSON array:
 
 ~~~
 ~$ python ./generate-tweet/main.py -f corpus.txt -n 2 -c 20 -j
