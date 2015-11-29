@@ -17,9 +17,10 @@ STRING_SUBS = OrderedDict([
     (r' is is ', r' is '),
     (r' to to ', r' to '),
     (r' the the ', r' the '),
+    (r'[Uu]\. [Ss]\.', r'U.S.'),
     (r" ' [Ss]( ?|\.|\.!\?|$)", r"'s "), #'s
     (r"^' [Ss] ", r''),                  #opening 's
-    (r"s ' ","[Ss]' "),                  #s'
+    (r"[Ss] ' ","s' "),                  #s'
     (r" ' (.*) '( ?|$)", r" '\1' "),     #shrink single-quotes around phrase
     (r" - (.*) -( ?|$)", r" -\1- "),     #shrink single-dash around phrase
     (r' \( (.*) \)', r' (\1)'),          #shrink parens around phrase
@@ -43,6 +44,8 @@ SHORTEN_1_SUBS = OrderedDict([
     (r' [Aa]re ', r' R '),
     (r'[Bb]ecause', r'b/c'),
     (r'[Bb]efore', r'b4'),
+    (r' Celebrity', r' Celeb'),
+    (r' celebrity', r' celeb'),
     (r'check', r'chk'),
     (r'click', r'clk'),
     (r'could', r'cld'),
@@ -52,6 +55,9 @@ SHORTEN_1_SUBS = OrderedDict([
     (r" it's ", r' its '),
     (r" it is ", r' its '),
     (r' [Oo][Uu[Rr] ', r' R '),
+    (r"[Rr]ussia ", r'Rus '),
+    (r"U\.S\.", r'US'),
+    (r'[Vv]ideo', r'vid'),
     (r'[Rr]e-?[Tt]weet', r'RT'),
     (r'[Tt]hank [Yy]ou', r'TY'),
     (r'[Tt]hanks', r'thx'),
@@ -78,6 +84,7 @@ SHORTEN_1_SUBS = OrderedDict([
 SHORTEN_2_SUBS = OrderedDict([
     (r'[Aa]bout', r'abt'),
     (r' [Oo]ne ', r' 1 '),
+    (r' [Pp]eople ', r' ppl '),
     (r' [Yy]ou ', r' U '),
     (r'\!\!\!', r'!'),
     (r'\?\?\?', r'?'),
