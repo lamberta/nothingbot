@@ -34,7 +34,6 @@ const INTERACTIVE_FLAG = argv.interactive;
 const MAX_LEN = 140; //it's twitter of course
 var twit = new Twit(SETTINGS.twitter);
 
-
 /**
  * @param {number?} opts.count = 1
  * @param {number?} opts.ngram = 3
@@ -45,8 +44,12 @@ function generateStatus (opts, callback) {
   let count = (typeof opts == 'object' && opts.count !== undefined) ? opts.count : 1;
   let ngram = (typeof opts == 'object' && opts.ngram !== undefined) ? opts.ngram : 3;
   let script = path.resolve(__dirname, '../generate-tweet/main.py');
-  let corpus = path.resolve(__dirname, '../corpus/tweets/realDonaldTrump.txt');
-  let cmd = `python ${script} -j -t ${corpus} -c ${count} -n ${ngram}`;
+  let corpus1 = path.resolve(__dirname, '../corpus/tweets/realDonaldTrump.txt');
+	let corpus2 = path.resolve(__dirname, '../corpus/sartre-being-and-nothingness.txt');
+  let cmd = `python ${script} -j -t ${corpus1} -f ${corpus2} -c ${count} -n ${ngram}`;
+
+	console.log(`Loading corpus: ${path.basename(corpus1)}`);
+	console.log(`Loading corpus: ${path.basename(corpus2)}`);
 
   child_process.exec(cmd, function (err, stdout, stderr) {
     if (err) {
