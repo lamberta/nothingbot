@@ -174,9 +174,10 @@ def build_tweets (token_lists, count=1, ngram=3):
     markov_tokens = markov.generate_from_token_lists(token_lists, ngram, gen_count)
     for tokens in markov_tokens:
         res = format_tweet(tokens)
-        res = shorten_tweet(res)
         if res is not None:
-            all_responses.append(res)
+            res = shorten_tweet(res)
+            if res is not None:
+                all_responses.append(res)
     all_responses.sort(key=len) #short to long
     all_responses.reverse()     #long to short
     #select middle section of list and randomize
