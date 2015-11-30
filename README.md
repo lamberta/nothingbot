@@ -3,20 +3,27 @@
 This generates a single response and posts it to the timeline:
 
 ~~~
-~$ node actions/post-tweet.js
+~$ node actions/tweet.js
 ~~~
 
 The default n-gram factor is 3, see the `-h` flag for options. To
 generate a number of choices and interactively prompt for a selection:
 
 ~~~
-~$ node actions/post-tweet.js -i
+~$ node actions/tweet.js -i
 ~~~
 
-You can also post an arbitrary status update from the command-line:
+Bypass generation and post an arbitrary status update from the command-line:
 
 ~~~
-~$ node actions/post-tweet.js -s 'post this tweet to status timeline'
+~$ node actions/tweet.js -s 'post this tweet to status timeline'
+~~~
+
+Read status from a JSON file containing an array of strings, pop off
+the first one to tweet, and write the remaining back to disk:
+
+~~~
+~$ node actions/tweet.js -f ./var/statuses.json
 ~~~
 
 # Generate Tweet

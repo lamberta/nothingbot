@@ -1,3 +1,4 @@
 settings.json
+var/
 corpus/tweets/*.txt
 corpus/tweets/*-html.tar.gz
