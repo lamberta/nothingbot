@@ -1,6 +1,7 @@
 'use strict';
 
 var path = require('path');
+var fs = require('fs');
 var child_process = require('child_process');
 var readline = require('readline');
 var Twit = require('twit');
@@ -12,8 +13,9 @@ var argv = require('yargs')
       .usage("Usage: $0 [options]")
       .alias('c', 'count').describe('c', 'Number of responses to generate').default('c', 1)
       .alias('n', 'ngram').describe('n', 'N-gram factor').default('n', 3)
-      .string('s').alias('s', 'status').describe('s', 'Post this status instead of generating one')
       .boolean('i').alias('i', 'interactive').describe('i', 'Select from list of generated responses')
+      .string('s').alias('s', 'status').describe('s', 'Post this status instead of generating one')
+      .string('f').alias('f', 'file').describe('f', 'Post status from JSON file and re-write to disk')
       .string('p').alias('p', 'prepend').describe('p', 'Prepend string to generated text (and space)')
       .string('a').alias('a', 'append').describe('a', 'Append string to generated text (and space)')
       .boolean('T').alias('T', 'trend').describe('T', 'Append random trending hashtag to generated text')
@@ -123,7 +125,7 @@ function postTweet (status, callback) {
     process.exit(1);
   }
   if (status.length > MAX_LEN) {
-    console.log(`Tweet is longer than ${MAX_LEN} chars (${argv.status.length}), aborting.`);
+    console.error(`Tweet is longer than ${MAX_LEN} chars (${argv.status.length}), aborting.`);
     process.exit(1);
   }
 
@@ -134,6 +136,50 @@ function postTweet (status, callback) {
       throw err;
     }
   });
+}
+
+/**
+ * @param {string} opts.file ---Path to JSON file of string array of statuses.
+ * @param {function(err, data, res)} callback
+ */
+function readStatusFileAndPost (opts, callback) {
+  let tweets;
+  try {
+    tweets = JSON.parse(fs.readFileSync(opts.file, 'utf8'));
+  } catch (err) {
+    console.error("Unable to load statuses file");
+    console.error(err.message);
+    process.exit(1);
+  }
+
+  if (!Array.isArray(tweets) || tweets.length === 0 || typeof tweets[0] !== 'string') {
+    throw new TypeError("Invalid format for status file or empty");
+  } else {
+    //get status, append any command-line tags, check len
+    let tweet = tweets.shift(); //remove from front of array
+    if (opts.prepend) { tweet = sh_escape(opts.prepend + ' ' + tweet); }
+    if (opts.append) { tweet = sh_escape(tweet + ' ' + opts.append); }
+
+    if (tweet.length > MAX_LEN) {
+      console.error(`Tweet is longer than ${MAX_LEN} chars (${tweet.length}), aborting.`);
+      console.error(tweet);
+      process.exit(1);
+    }
+
+    postTweet(tweet, function (err, data, res) {
+      if (err) {
+        console.error(`Error posting tweet: ${err.message}`);
+        process.exit(1);
+      }
+      //write adjusted tweet array to disk (pretty-print)
+      fs.writeFile(opts.file, JSON.stringify(tweets, null, 2), function (err) {
+        if (err) {
+          console.error(`Error saving file ${opts.file}: err.message`);
+        }
+        callback(err, data, res);
+      });
+    });
+  }
 }
 
 /**
@@ -214,17 +260,24 @@ if (argv.hasOwnProperty('status')) {
   //if interactive have at least 10 choices
   if (INTERACTIVE_FLAG && opts.count < 10) { opts.count = 10; }
 
-  console.log(`Generating ${opts.count} tweet${opts.count>1?'s':''}, n-gram factor ${opts.ngram} ...`);
+  if (argv.file) {
+    opts.file = argv.file;
+    //read status from file and post
+    readStatusFileAndPost(opts, onFinish);
 
-  //do we need to query twitter first?
-  if (argv.trend) {
-    getTrendingTopics({placeId: places['us'], hashtag: true}, function (err, trends) {
-      let trend = trends[Math.floor(Math.random() * trends.length)]; //random element
-      opts.append = (opts.append) ? (opts.append + ' ' + trend) : trend;
-      console.log(`Current trending topics: ${trends.join(', ')}`);
-      generateStatus(opts, interactivePostTweet);
-    });
   } else {
-    generateStatus(opts, interactivePostTweet);
+    console.log(`Generating ${opts.count} tweet${opts.count>1?'s':''}, n-gram factor ${opts.ngram} ...`);
+
+    //query twitter first?
+    if (argv.trend) {
+      getTrendingTopics({placeId: places['us'], hashtag: true}, function (err, trends) {
+        let trend = trends[Math.floor(Math.random() * trends.length)]; //random element
+        opts.append = (opts.append) ? (opts.append + ' ' + trend) : trend;
+        console.log(`Current trending topics: ${trends.join(', ')}`);
+        generateStatus(opts, interactivePostTweet);
+      });
+    } else {
+      generateStatus(opts, interactivePostTweet);
+    }
   }
 }
