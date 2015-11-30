@@ -9,11 +9,13 @@ var Twit = require('twit');
  * COMMAND-LINE ARGS
  */
 var argv = require('yargs')
-      .usage("Usage: $0 [--count=n --ngram=n --status=string --interactive]")
+      .usage("Usage: $0 [options]")
       .alias('c', 'count').describe('c', 'Number of responses to generate').default('c', 1)
       .alias('n', 'ngram').describe('n', 'N-gram factor').default('n', 3)
-      .string('s').alias('s', 'status').describe('s', 'Tweet status, do not generate')
+      .string('s').alias('s', 'status').describe('s', 'Post this status instead of generating one')
       .boolean('i').alias('i', 'interactive').describe('i', 'Select from list of generated responses')
+      .string('p').alias('p', 'prepend').describe('p', 'Prepend string to generated text (and space)')
+      .string('a').alias('a', 'append').describe('a', 'Append string to generated text (and space)')
       .help('h').alias('h', 'help')
       .argv;
 
@@ -45,11 +47,14 @@ function generateStatus (opts, callback) {
   let ngram = (typeof opts == 'object' && opts.ngram !== undefined) ? opts.ngram : 3;
   let script = path.resolve(__dirname, '../generate-tweet/main.py');
   let corpus1 = path.resolve(__dirname, '../corpus/tweets/realDonaldTrump.txt');
-	let corpus2 = path.resolve(__dirname, '../corpus/sartre-being-and-nothingness.txt');
+  let corpus2 = path.resolve(__dirname, '../corpus/sartre-being-and-nothingness.txt');
   let cmd = `python ${script} -j -t ${corpus1} -f ${corpus2} -c ${count} -n ${ngram}`;
+  //check for user text, escape '#' for bash
+  if (argv.prepend) { cmd += ` -p ${argv.prepend.replace(/#/g, '\\#')}`; }
+  if (argv.append) { cmd += ` -a ${argv.append.replace(/#/g, '\\#')}`; }
 
-	console.log(`Loading corpus: ${path.basename(corpus1)}`);
-	console.log(`Loading corpus: ${path.basename(corpus2)}`);
+  console.log(`Loading corpus: ${path.basename(corpus1)}`);
+  console.log(`Loading corpus: ${path.basename(corpus2)}`);
 
   child_process.exec(cmd, function (err, stdout, stderr) {
     if (err) {

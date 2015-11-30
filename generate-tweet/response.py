@@ -166,18 +166,25 @@ def list_middle (lst, count=1, offset=0):
     return lst[start : start+count]
 
 
-def build_tweets (token_lists, count=1, ngram=3):
+def build_tweets (token_lists, count=1, ngram=3, text_prepend=None, text_append=None):
     all_responses = []
     #generate twice as many as we need, min 10, take the longest of the bunch
     gen_count = count*2
     if gen_count < 10: gen_count = 10
     markov_tokens = markov.generate_from_token_lists(token_lists, ngram, gen_count)
     for tokens in markov_tokens:
-        res = format_tweet(tokens)
+        res = format_tweet(tokens) #return initial string atempt, or none
         if res is not None:
-            res = shorten_tweet(res)
+            res = shorten_tweet(res) #attempt a couple of tries to shorten string, or none
             if res is not None:
-                all_responses.append(res)
+                #append any user text with space (shoud be done with shorten_tweet?
+                if text_prepend is not None: res = (text_prepend + ' ' + res)
+                if text_append is not None: res = (res + ' ' + text_append)
+                #squeeze whitespace
+                res = re.sub(r'\s+', ' ', res)
+                #check length again before adding
+                if len(res) <= TWITTER_LEN:
+                    all_responses.append(res)
     all_responses.sort(key=len) #short to long
     all_responses.reverse()     #long to short
     #select middle section of list and randomize

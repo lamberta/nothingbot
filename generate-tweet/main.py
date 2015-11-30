@@ -12,21 +12,25 @@ RETURN_JSON = False
 NGRAM_LEN = 3
 CORPUS_TEXT_FILES = []
 CORPUS_TWEET_FILES = []
+TEXT_PREPEND = None
+TEXT_APPEND = None
 
 def print_usage (header=None):
     if header:
         print(header, file=sys.stderr)
     print("Usage: python %s [options]" % sys.argv[0], file=sys.stderr)
-    print(" -c=n    Number of responses to return (default: %i)" % RETURN_COUNT, file=sys.stderr)
-    print(" -n=n    Use n-grams of length n (default: %i)" % NGRAM_LEN, file=sys.stderr)
-    print(" -f=file Text file corpus, to be split on sentences", file=sys.stderr)
-    print(" -t=file Text file of tweets, one per line", file=sys.stderr)
-    print(" -j      Output response(s) in a JSON array", file=sys.stderr)
-    print(" -h", file=sys.stderr)
+    print(" -c=n     Number of responses to return (default: %i)" % RETURN_COUNT, file=sys.stderr)
+    print(" -n=n     Use n-grams of length n (default: %i)" % NGRAM_LEN, file=sys.stderr)
+    print(" -f=file  Text file corpus, to be split on sentences", file=sys.stderr)
+    print(" -t=file  Text file of tweets, one per line", file=sys.stderr)
+    print(" -p=text  Prepend string to generated text (and space)", file=sys.stderr)
+    print(" -a=text  Append string to generated text (and space)", file=sys.stderr)
+    print(" -j       Output response(s) in a JSON array", file=sys.stderr)
+    print(" -h       Print this help message", file=sys.stderr)
 
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'n:c:f:t:jh')
+    opts, args = getopt.getopt(sys.argv[1:], 'n:c:f:t:p:a:jh')
 except getopt.GetoptError:
     print_usage("Unrecognized option!")
     sys.exit(1)
@@ -40,6 +44,10 @@ for opt, arg in opts:
         CORPUS_TEXT_FILES.append(arg)
     elif opt == '-t':
         CORPUS_TWEET_FILES.append(arg)
+    elif opt == '-p':
+        TEXT_PREPEND = arg
+    elif opt == '-a':
+        TEXT_APPEND = arg
     elif opt == '-j':
         RETURN_JSON = True
     elif opt == '-h':
@@ -70,5 +78,5 @@ if __name__ == '__main__':
         print_usage()
         sys.exit(1)
 
-    responses = build_tweets(corpus_tokens, RETURN_COUNT, NGRAM_LEN)
+    responses = build_tweets(corpus_tokens, RETURN_COUNT, NGRAM_LEN, text_prepend=TEXT_PREPEND, text_append=TEXT_APPEND)
     print_output(responses)
