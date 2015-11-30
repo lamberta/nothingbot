@@ -16,6 +16,7 @@ var argv = require('yargs')
       .boolean('i').alias('i', 'interactive').describe('i', 'Select from list of generated responses')
       .string('p').alias('p', 'prepend').describe('p', 'Prepend string to generated text (and space)')
       .string('a').alias('a', 'append').describe('a', 'Append string to generated text (and space)')
+      .boolean('T').alias('T', 'trend').describe('T', 'Append random trending hashtag to generated text')
       .help('h').alias('h', 'help')
       .argv;
 
@@ -34,11 +35,24 @@ try {
 
 const INTERACTIVE_FLAG = argv.interactive;
 const MAX_LEN = 140; //it's twitter of course
+//uses Yahoo's "Where on Earth" id
+const places = {
+  'all': '1', //world
+  'us': '23424977'
+};
+
 var twit = new Twit(SETTINGS.twitter);
+
+//since the string is going through the shell, need to escape special chars
+function sh_escape (str) {
+  return str.replace(/([()[#{*+.$^! \\|?])/g, '\\$1');
+}
 
 /**
  * @param {number?} opts.count = 1
  * @param {number?} opts.ngram = 3
+ * @param {string?} opts.prepend
+ * @param {string?} opts.append
  * @param {function(err, array[string])} callback
  */
 function generateStatus (opts, callback) {
@@ -49,9 +63,9 @@ function generateStatus (opts, callback) {
   let corpus1 = path.resolve(__dirname, '../corpus/tweets/realDonaldTrump.txt');
   let corpus2 = path.resolve(__dirname, '../corpus/sartre-being-and-nothingness.txt');
   let cmd = `python ${script} -j -t ${corpus1} -f ${corpus2} -c ${count} -n ${ngram}`;
-  //check for user text, escape '#' for bash
-  if (argv.prepend) { cmd += ` -p ${argv.prepend.replace(/#/g, '\\#')}`; }
-  if (argv.append) { cmd += ` -a ${argv.append.replace(/#/g, '\\#')}`; }
+
+  if (opts.prepend) { cmd += ` -p ${sh_escape(opts.prepend)}`; }
+  if (opts.append) { cmd += ` -a ${sh_escape(opts.append)}`; }
 
   console.log(`Loading corpus: ${path.basename(corpus1)}`);
   console.log(`Loading corpus: ${path.basename(corpus2)}`);
@@ -76,6 +90,30 @@ function generateStatus (opts, callback) {
 }
 
 /**
+ * @param {string} opts.placeId --Uses Yahoo's "Where on Earth" id.
+ * @param {boolean?} opts.hashtag = false --Convert all trending topics to hashtags
+ * @param {function(err, array[string])} callback
+ */
+function getTrendingTopics (opts, callback) {
+  twit.get('trends/place', {id: opts.placeId}, function (err, data, res) {
+    let trends = [];
+    for (let obj of data[0].trends) {
+      //hail corporate
+      if (!obj.promoted_content) {
+        let name = obj.name;
+        //hashtagify?
+        if (opts.hashtag) {
+          name = name.replace(/\s/g, ''); //remove spaces
+          if (name[0] !== '#') { name = ('#' + name); } //prepend
+        }
+        trends.push(name);
+      }
+    }
+    callback(err, trends);
+  });
+}
+
+/**
  * @param {string} status
  * @param {function(err, data, response)} callback
  */
@@ -96,19 +134,6 @@ function postTweet (status, callback) {
       throw err;
     }
   });
-}
-
-/**
- * @param {error?} err
- * @param {object} data ---Twitter API 'tweet' object: https://dev.twitter.com/overview/api/tweets
- * @param {} response
- */
-function onTweetPost (err, data, response) {
-  if (err) throw err;
-  console.log(`Posted tweet to ${data.user.name}'s timeline!`);
-  console.log(data.text);
-  console.log(`https://twitter.com/${data.user.screen_name}/status/${data.id_str}`);
-  process.exit(0);
 }
 
 /**
@@ -141,30 +166,65 @@ function promptSelection (choices, callback) {
   });
 }
 
+/**
+ * Interactively post tweet, if necessary.
+ */
+function interactivePostTweet (err, strings) {
+  if (err) throw err;
+
+  if (INTERACTIVE_FLAG) {
+    promptSelection(strings, function (status) {
+      postTweet(status, onFinish);
+    });
+  } else {
+    postTweet(strings[0], onFinish);
+  }
+}
+
+/**
+ * Tweet posted, display info and exit.
+ * @param {error?} err
+ * @param {object} data ---Twitter API 'tweet' object: https://dev.twitter.com/overview/api/tweets
+ * @param {} response
+ */
+function onFinish (err, data, response) {
+  if (err) throw err;
+  console.log(`Posted tweet to ${data.user.name}'s timeline!`);
+  console.log(data.text);
+  console.log(`https://twitter.com/${data.user.screen_name}/status/${data.id_str}`);
+  process.exit(0);
+}
+
 /*
  * MAIN
  */
 
 //user-supplied or generate our own
 if (argv.hasOwnProperty('status')) {
-  postTweet(argv.status, onTweetPost);
+  postTweet(argv.status, onFinish);
+
 } else {
-  let count = parseInt(argv.count);
-  let ngram = parseInt(argv.ngram);
-  //minimum of 10 choices
-  if (INTERACTIVE_FLAG && count < 10) { count = 10; }
+  //parse command-line options
+  let opts = {
+    count: parseInt(argv.count),
+    ngram: parseInt(argv.ngram),
+    prepend: argv.prepend,
+    append: argv.append
+  };
+  //if interactive have at least 10 choices
+  if (INTERACTIVE_FLAG && opts.count < 10) { opts.count = 10; }
 
-  console.log(`Generating ${count} tweet${count>1?'s':''}, n-gram factor ${ngram} ...`);
+  console.log(`Generating ${opts.count} tweet${opts.count>1?'s':''}, n-gram factor ${opts.ngram} ...`);
 
-  generateStatus({count: count, ngram: ngram}, function (err, strings) {
-    if (err) throw err;
-
-    if (INTERACTIVE_FLAG) {
-      promptSelection(strings, function (status) {
-        postTweet(status, onTweetPost);
-      });
-    } else {
-      postTweet(strings[0], onTweetPost);
-    }
-  });
+  //do we need to query twitter first?
+  if (argv.trend) {
+    getTrendingTopics({placeId: places['us'], hashtag: true}, function (err, trends) {
+      let trend = trends[Math.floor(Math.random() * trends.length)]; //random element
+      opts.append = (opts.append) ? (opts.append + ' ' + trend) : trend;
+      console.log(`Current trending topics: ${trends.join(', ')}`);
+      generateStatus(opts, interactivePostTweet);
+    });
+  } else {
+    generateStatus(opts, interactivePostTweet);
+  }
 }
