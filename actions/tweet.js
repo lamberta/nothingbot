@@ -1,3 +1,4 @@
+/* jshint esversion:6, node:true */
 'use strict';
 
 var path = require('path');
@@ -255,13 +256,13 @@ if (argv.hasOwnProperty('status')) {
     count: parseInt(argv.count),
     ngram: parseInt(argv.ngram),
     prepend: argv.prepend,
-    append: argv.append
+    append: argv.append,
+    file: argv.file
   };
   //if interactive have at least 10 choices
   if (INTERACTIVE_FLAG && opts.count < 10) { opts.count = 10; }
 
-  if (argv.file) {
-    opts.file = argv.file;
+  if (opts.file) {
     //read status from file and post
     readStatusFileAndPost(opts, onFinish);
 
