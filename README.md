@@ -118,3 +118,11 @@ looks like:
 ~~~
 669750537252970496,2015-11-27T02:57:21.000Z,"escaped \"status\" text"
 ~~~
+
+# Scheduling
+
+Add the following to your crontab to schedule a daily tweet at 11am:
+
+~~~
+0 11 * * * /path/to/trumplebot/bin/autotweet
+~~~

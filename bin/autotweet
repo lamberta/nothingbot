@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+## Will use a status file if it exists, otherwise generate a new tweet.
+
+ROOT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd)
+STATUS_FILE="${ROOT_DIR}/var/statuses.json"
+TWEET_OPTS=''
+
+if [ -f "$STATUS_FILE" ]; then
+  #attempts to parse json file and read first element of an array
+  cat "$STATUS_FILE" | \
+    python -c 'import sys,json; print json.load(sys.stdin)[0]' > /dev/null 2>&1
+  #if no problem, assume the file is good enough to pass on
+  if [[ $? == 0 ]]; then
+    TWEET_OPTS="${TWEET_OPTS} -f ${STATUS_FILE}"
+  fi
+fi
+
+node "${ROOT_DIR}/actions/tweet.js" ${TWEET_OPTS}
