@@ -2,8 +2,12 @@
 ## Will use a status file if it exists, otherwise generate a new tweet.
 
 ROOT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd)
-STATUS_FILE="${ROOT_DIR}/var/statuses.json"
+SETTINGS_FILE="${ROOT_DIR}/settings.json"
 TWEET_OPTS=''
+
+if [ -f "$SETTINGS_FILE" ]; then
+  STATUS_FILE=$(cat "$SETTINGS_FILE" | python -c 'import sys,json; print json.load(sys.stdin).get("statuses")')
+fi
 
 if [ -f "$STATUS_FILE" ]; then
   #attempts to parse json file and read first element of an array
