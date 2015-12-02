@@ -7,6 +7,11 @@ TWEET_OPTS=''
 
 if [ -f "$SETTINGS_FILE" ]; then
   STATUS_FILE=$(cat "$SETTINGS_FILE" | python -c 'import sys,json; print json.load(sys.stdin).get("statuses")')
+  NODE_BIN=$(cat "$SETTINGS_FILE" | python -c 'import sys,json; print json.load(sys.stdin).get("nodejs")')
+fi
+
+if [ -z "$NODE_BIN" ]; then
+  NODE_BIN=$(which node)
 fi
 
 if [ -f "$STATUS_FILE" ]; then
@@ -19,4 +24,4 @@ if [ -f "$STATUS_FILE" ]; then
   fi
 fi
 
-node "${ROOT_DIR}/actions/tweet.js" ${TWEET_OPTS}
+$NODE_BIN "${ROOT_DIR}/actions/tweet.js" ${TWEET_OPTS}
