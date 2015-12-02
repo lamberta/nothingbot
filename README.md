@@ -8,6 +8,8 @@ With Node.js and Python2.7+ installed (and [pip](https://packaging.python.org/en
 ~$ make install
 ~~~
 
+Edit the `settings.json` file and add your Twitter auth keys.
+
 # Post Tweet
 
 This generates a single response and posts it to the timeline:
