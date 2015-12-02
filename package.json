@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "twit": "latest",
+    "yargs": "latest",
     "htmlparser2": "latest",
     "soupselect": "latest"
   }
