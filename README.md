@@ -1,3 +1,13 @@
+# Install
+
+With Node.js and Python2.7+ installed (and [pip](https://packaging.python.org/en/latest/installing/)):
+
+~~~
+~$ git clone https://github.com/lamberta/trumplebot.git
+~$ cd trumplebot
+~$ make install
+~~~
+
 # Post Tweet
 
 This generates a single response and posts it to the timeline:

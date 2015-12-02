@@ -1,0 +1,16 @@
+{
+  "name": "trumplebot",
+  "description": "A Twitter bot fed with thousands of Donald Trump tweets and Sartre's Being and Nothingness.",
+  "homepage": "https://twitter.com/trumplebot",
+  "author": "Billy Lamberta",
+  "license": "Artistic-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lamberta/trumplebot"
+  },
+  "dependencies": {
+    "twit": "latest",
+    "htmlparser2": "latest",
+    "soupselect": "latest"
+  }
+}
