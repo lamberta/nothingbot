@@ -3,7 +3,7 @@
 
 ROOT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd)
 SETTINGS_FILE="${ROOT_DIR}/settings.json"
-TWEET_OPTS=''
+TWEET_OPTS='-n2'
 
 if [ -f "$SETTINGS_FILE" ]; then
   STATUS_FILE=$(cat "$SETTINGS_FILE" | python -c 'import sys,json; print json.load(sys.stdin).get("statuses")')
