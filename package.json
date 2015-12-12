@@ -1,5 +1,6 @@
 {
   "name": "trumplebot",
+  "version": "0.0.1",
   "description": "A Twitter bot fed with thousands of Donald Trump tweets and Sartre's Being and Nothingness.",
   "homepage": "https://twitter.com/trumplebot",
   "author": "Billy Lamberta",

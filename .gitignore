@@ -5,3 +5,4 @@ settings.json
 *.pyc
 corpus/**/*.txt
 corpus/tweets/*-html.tar.gz
+npm-debug.log
